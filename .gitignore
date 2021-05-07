@@ -1,0 +1,7 @@
+**/.DS_Store
+*__pycache__*
+data/new
+data/old
+data/*.p
+toy_data
+results
