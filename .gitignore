@@ -1,7 +1,6 @@
 **/.DS_Store
 *__pycache__*
-data/new
-data/old
-data/*.p
+data
 toy_data
-results
+features
+.vscode
