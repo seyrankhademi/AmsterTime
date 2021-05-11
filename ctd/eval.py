@@ -257,13 +257,13 @@ if __name__ == '__main__':
     parser.add_argument('--task', default=tasks[0], choices=tasks,
                         help='name of task to run evaluation for')
     parser.add_argument('--file', default='tasks/verification.csv',
-                        help='path for task file')
-    parser.add_argument(
-        '--feats', help='path for pickle file to read features')
+                        help='path to task file')
+    parser.add_argument('--feats',
+                        help='path to pickle file to read features')
     parser.add_argument('--k', type=int, default=1,
                         help='k in p@k')
     parser.add_argument('--dist_type', default=dist_types[0], choices=dist_types,
-                        help='Distance type: ')
+                        help='distance type')
     args = parser.parse_args()
 
     main(args)
