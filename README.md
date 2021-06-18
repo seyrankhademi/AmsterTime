@@ -5,6 +5,10 @@ This repository contains a dataset of image pairs from historical Amsterdam and 
 | :----------------------------------------------------------: | :----------------------------------------------------------: |
 | *Historical image from [Amsterdam Beeldbank](https://archief.amsterdam/beeldbank)* |          *Corresponding street-view from Mapillary*          |
 
+And the visualization of the dataset using t-SNE:
+
+![The visualization of the dataset with t-SNE](.github/tsne.jpg)
+
 ## Requirements
 
 The code works on `python >= 3.8`.

@@ -4,7 +4,8 @@ import argparse
 import pickle
 import numpy as np
 import cv2 as cv
-from utils import reduce_dim
+
+from .utils import reduce_dim
 
 # To create tsne plot, download and compile https://github.com/lvdmaaten/bhtsne
 # in the parent directory.
@@ -18,7 +19,7 @@ except Exception as e:
 
 classes = ['new', 'old']
 class_colors = {'new': (255, 0, 0), 'old': (0, 255, 0)}
-tiny_size = 128
+tiny_size = 256
 img_size = 4000
 
 
@@ -63,7 +64,7 @@ def main(args):
     embeddings = bhtsne.run_bh_tsne(X, initial_dims=X.shape[1])
     print(f'Embeddings calculated with a shape of {embeddings.shape}')
 
-    big_picture = np.zeros((img_size * 2, img_size * 2, 3))
+    big_picture = np.ones((img_size * 2, img_size * 2, 3)) * 255
     center = np.array((img_size - tiny_size / 2, img_size - tiny_size / 2))
     units = (img_size - tiny_size / 2) / \
         np.max(np.absolute(embeddings), axis=0)
@@ -73,8 +74,8 @@ def main(args):
         h, w = img.shape[:2]
         pos = em * units + center
         pos = pos.astype(np.uint).tolist()
-        img = cv.addWeighted(
-            big_picture[pos[0]:pos[0]+h, pos[1]:pos[1]+w, :], 0.5, img, 0.5, 0)
+        # img = cv.addWeighted(
+        #     big_picture[pos[0]:pos[0]+h, pos[1]:pos[1]+w, :], 0.25, img, 0.75, 0)
         big_picture[pos[0]:pos[0]+h, pos[1]:pos[1]+w, :] = img
     cv.imwrite('tsne.jpg', big_picture)
 
