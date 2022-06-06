@@ -1,35 +1,102 @@
-# Cross-Time Dataset
-This repository contains a dataset of image pairs from historical Amsterdam and corresponding current street-view of the same place with evaluation code. The pairs are collected using crowd-sourcing methods. For a given historical image, which contains a view of a place in Amsterdam and has a provided approximate location on the map, volunteers find the best shot point of that image by moving around on the street-view application and once they believe that they find the best point a screenshot is taken. After this process, each found pair passes from moderator verification. There are currectly 1231 verified pairs. The following is a sample pair in the dataset:
+# AmsterTime: A Visual Place Recognition Benchmark Dataset for Severe Domain Shift
 
-| ![Historical image from Amsterdam Beeldbank](http://images.memorix.nl/ams/thumb/widget640/816cac37-15a1-4740-607a-6795df87e0f5.jpg) | ![Corresponding street-view from Mapillary](.github/sample_mapillary.png) |
-| :----------------------------------------------------------: | :----------------------------------------------------------: |
-| *Historical image from [Amsterdam Beeldbank](https://archief.amsterdam/beeldbank)* |          *Corresponding street-view from Mapillary*          |
+This repository contains AmsterTime dataset and its offical evaluation code for [AmsterTime: A Visual Place Recognition Benchmark Dataset for Severe Domain Shift](https://arxiv.org/abs/2203.16291).
+
+The dataset consists of image pairs from historical Amsterdam and corresponding current street-view of the same place with evaluation code. The pairs are collected using crowd-sourcing methods. For a given historical image, which contains a view of a place in Amsterdam and has a provided approximate location on the map, volunteers find the best shot point of that image by moving around on the street-view application and once they believe that they find the best point, a screenshot is taken. After this process, each found pair passes from moderator verification. There are currectly 1231 verified pairs. The following is a sample pair in the dataset:
+
+|       ![Historical image from Amsterdam Beeldbank](.github/historical.jpg)       | ![Corresponding street-view from Mapillary](.github/street-view.png) |
+| :------------------------------------------------------------------------------: | :------------------------------------------------------------------: |
+| Historical image from [Amsterdam Beeldbank](https://archief.amsterdam/beeldbank) |            Corresponding street-view image from Mapillary            |
 
 And the visualization of the dataset using t-SNE:
 
 ![The visualization of the dataset with t-SNE](.github/tsne.jpg)
 
+For other and bigger versions of the visualazations: [t-SNE Visualizations](https://surfdrive.surf.nl/files/index.php/f/10154927926)
+
+For more information please refer to [the paper](https://arxiv.org/abs/2203.16291)
+
+## Download AmsterTime Dataset
+
+AmsterTime dataset is published at [here](https://doi.org/10.4121/19580806). The dataset has also been shared via Kaggle at [this link](https://www.kaggle.com/datasets/byildiz/amstertime).
+
+The dataset directory structure:
+
+```
+├── description.md: short description of the dataset
+├── image_pairs.csv: information on image pairs and their sources
+├── new
+│   ├── 0000.png
+│   ├── 0001.png
+│   ├── 0002.png
+│   ├── 0003.png
+│   └── ...
+└── old
+    ├── 0000.jpg
+    ├── 0001.jpg
+    ├── 0002.jpg
+    ├── 0003.jpg
+    └── ...
+```
+
 ## Requirements
 
-The code works on `python >= 3.8`.
-
-To install requirements:
+First of all you need to install [conda](https://docs.conda.io/en/latest/) (miniconda or anaconda). Once the conda is installed, you can create an environment with the required dependecies by running:
 
 ```
-pip install -r requirements.txt
+conda env create -f environment.yml -n amstertime
 ```
+
+Then you can activate the created conda environment by running:
+
+```
+conda activate amstertime
+```
+
+If you want to use t-SNE visualization script, you also need to install Barners-Hut t-SNE from [here](https://github.com/lvdmaaten/bhtsne).
 
 ## Tasks
 
 ### Verification
 
-The aim of this task is that for a given image pair of historical image and street-view image determining whether the pair is positive which means that they are taken from same place.
+Verification is a binary classification (auxiliary) task to detect a pair of archival and street view images of the same place.
 
 ### Retrieval
 
-This task is to find corresponding image in the mapillary images for a given historical image or vice versa.
+For the retrieval task, AmsterTime dataset offers 1231 query images where the leave-one-out set serves as the gallery images for each query.
 
 ## Usage
+
+### Code
+
+Directory structure and short explanations of the files:
+
+```
+AmsterTime
+├── README.md
+├── amstertime
+│   ├── __init__.py
+│   ├── cluster_feat.py: Clusters features of SIFT and LIFT.
+│   ├── compute_bovw.py: Creates BoVW features using cluster centers for SIFT and LIFT.
+│   ├── eval.py: Main evaluation script. See next section for more detail.
+│   ├── extract_cnn.py: Feature extractor for common CNN models.
+│   ├── extract_sift.py: SIFT feature extractor.
+│   ├── generate_task.py: Task generator.
+│   ├── split_dataset.py: Splits dataset into train and validation sets.
+│   ├── utils.py: Utility functions.
+│   └── visualize_tsne.py: Creates t-SNE visualizations.
+├── datasets
+│   ├── __init__.py
+│   ├── prepare_amstertime.py: AmsterTime dataset preperation script. No need to use if you directly download the dataset.
+│   ├── prepare_gldv2_amsterdam.py: Creates subset of Google Landmarks Datasets v2 (GLDv2) which consists of selected landmarks in Amsterdam. Requires fully downloaded GLDv2.
+│   └── selected_landmarks.csv: Selected landmarks in Amsterdam in GLDv2.
+├── environment.yml
+└── tasks: Task files
+    ├── retrieval.csv
+    ├── retrieval_test.csv
+    ├── verification.csv
+    └── verification_test.csv
+```
 
 ### Evaluation
 
@@ -38,13 +105,13 @@ Evaluation code works with pickle file of features and calculates metrics for ei
 ```
 {
   'new': {
-    'image_1.png': feature_array_for_image1,
-    'image_2.png': feature_array_for_image2,
+    '0000.png': feature_array_for_image1,
+    '0001.png': feature_array_for_image2,
     ...
   },
   'old': {
-    'image_1.png': feature_array_for_image1,
-    'image_2.png': feature_array_for_image2,
+    '0000.jpg': feature_array_for_image1,
+    '0001.jpg': feature_array_for_image2,
     ...
   }
 }
@@ -52,8 +119,8 @@ Evaluation code works with pickle file of features and calculates metrics for ei
 
 Usage of evaluation code:
 
-```bash
-python -m ctd.eval --help
+```
+python -m amstertime.eval --help
 ```
 
 ```
@@ -72,54 +139,60 @@ optional arguments:
                         distance type
 ```
 
-Example usage to calculate metrics for verification task for BoW features computed using SIFT descriptors:
+Example usage to calculate metrics for retrieval task for ResNet-50 model trained using SimSiam method on AmsterTime:
 
 ```
-python ctd.eval --task verification --file tasks/verification.csv --feats features/sift_128.p 
+python -m amstertime.eval --task retrieval --file tasks/retrieval.csv --feats features/simsiam_resnet50_scratch_amstertime_ep10000_bs128.p --k 128 --dist_type cosine
 ```
 
 ## Results
 
-Many methods and pre-trained models are used to extract features and the features are used for verification and retrieval tasks. We shared all of the features extracted in [this link](https://data.4tu.nl/account/articles/14572644). The following table shows the details of files in the link:
+Many methods and pre-trained models are explored and evaluated on AmsterTime. We share all of the features extracted on AmsterTime at [this link](https://doi.org/10.4121/14572644). The following table shows the details of the methods:
 
-| File                                                         | Method / Model                                               | Paper                                                        | Codebase                                            |
-| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | --------------------------------------------------- |
-| [sift_128.p](https://data.4tu.nl/ndownloader/files/27962772) | SIFT                                                         | https://link.springer.com/article/10.1023/B:VISI.0000029664.99615.94 | https://github.com/seyrankhademi/cross-time-dataset |
-| [lift_piccadilly_128.p](https://data.4tu.nl/ndownloader/files/28329594) | LIFT                                                         | https://link.springer.com/chapter/10.1007%2F978-3-319-46466-4_28 | https://github.com/cvlab-epfl/tf-lift               |
-| [vgg16_imagenet.p](https://data.4tu.nl/ndownloader/files/27962799) | VGG-16                                                       | https://arxiv.org/abs/1409.1556v4                            | https://github.com/pytorch/vision                   |
-| [resnet50_imagenet.p](https://data.4tu.nl/ndownloader/files/27962766) | ResNet-50                                                    | https://arxiv.org/abs/1512.03385                             | https://github.com/pytorch/vision                   |
-| [resnet101_imagenet.p](https://data.4tu.nl/ndownloader/files/27962769) | ResNet-101                                                   | https://arxiv.org/abs/1512.03385                             | https://github.com/pytorch/vision                   |
-| [netvlad_pittsburgh250k.p](https://data.4tu.nl/ndownloader/files/28329639) | [NetVLAD w/ ResNet-18](https://drive.google.com/open?id=17luTjZFCX639guSVy00OUtzfTQo4AMF2) | https://arxiv.org/abs/1511.07247                             | https://github.com/Nanne/pytorch-NetVlad            |
-| [simsiam_resnet18_scratch.p](https://data.4tu.nl/ndownloader/files/27962790) | SimSiam w/ ResNet-18                                         | https://arxiv.org/abs/2011.10566                             | Self-reproduction (Code will be available)          |
-| [simsiam_resnet18_imagenet.p](https://data.4tu.nl/ndownloader/files/27962784) | SimSiam w/ ResNet-18                                         | https://arxiv.org/abs/2011.10566                             | Self-reproduction (Code will be available)          |
-| [simsiam_netvlad_pittsburgh250k.p](https://data.4tu.nl/ndownloader/files/28329642) | SimSiam w/ NetVLAD                                           | https://arxiv.org/abs/2011.10566                             | Self-reproduction (Code will be available)          |
-| [ap_gem.p](https://data.4tu.nl/ndownloader/files/27962757)   | [Resnet101-AP-GeM](https://drive.google.com/open?id=1UWJGDuHtzaQdFhSMojoYVQjmCXhIwVvy) | https://arxiv.org/abs/1906.07589                             | https://github.com/naver/deep-image-retrieval       |
-| [triplet_resnet18_imagenet.p](https://data.4tu.nl/ndownloader/files/27962793) | Triplet ResNet-18                                            | http://www.bmva.org/bmvc/2016/papers/paper119/index.html     | Self-reproduction (Code will be available)          |
+| Method              | Paper                                                                | Codebase                                      | Extracted Features               |
+| ------------------- | -------------------------------------------------------------------- | --------------------------------------------- | -------------------------------- |
+| SIFT w/ BoVW        | https://link.springer.com/article/10.1023/B:VISI.0000029664.99615.94 | https://github.com/seyrankhademi/AmsterTime   | https://doi.org/10.4121/14572644 |
+| LIFT w/ BoVW        | https://link.springer.com/chapter/10.1007%2F978-3-319-46466-4_28     | https://github.com/cvlab-epfl/tf-lift         | https://doi.org/10.4121/14572644 |
+| VGG-16              | https://arxiv.org/abs/1409.1556v4                                    | https://github.com/pytorch/vision             | https://doi.org/10.4121/14572644 |
+| ResNet-50           | https://arxiv.org/abs/1512.03385                                     | https://github.com/pytorch/vision             | https://doi.org/10.4121/14572644 |
+| ResNet-101          | https://arxiv.org/abs/1512.03385                                     | https://github.com/pytorch/vision             | https://doi.org/10.4121/14572644 |
+| NetVLAD (VGG-16)    | https://arxiv.org/abs/1511.07247                                     | https://github.com/Nanne/pytorch-NetVlad      | https://doi.org/10.4121/14572644 |
+| AP-GeM (ResNet-101) | https://arxiv.org/abs/1906.07589                                     | https://github.com/naver/deep-image-retrieval | https://doi.org/10.4121/14572644 |
+| SimSiam (ResNet-50) | https://arxiv.org/abs/2011.10566                                     | https://github.com/facebookresearch/simsiam   | https://doi.org/10.4121/14572644 |
+| SimSiam (ResNet-50) | https://arxiv.org/abs/2011.10566                                     | https://github.com/facebookresearch/simsiam   | https://doi.org/10.4121/14572644 |
+| SimSiam (ResNet-50) | https://arxiv.org/abs/2011.10566                                     | https://github.com/facebookresearch/simsiam   | https://doi.org/10.4121/14572644 |
+| SimSiam (VGG-16)    | https://arxiv.org/abs/2011.10566                                     | https://github.com/facebookresearch/simsiam   | https://doi.org/10.4121/14572644 |
+| SimSiam (VGG-16)    | https://arxiv.org/abs/2011.10566                                     | https://github.com/facebookresearch/simsiam   | https://doi.org/10.4121/14572644 |
+| SimSiam (VGG-16)    | https://arxiv.org/abs/2011.10566                                     | https://github.com/facebookresearch/simsiam   | https://doi.org/10.4121/14572644 |
 
-### Results for verification task
+The extracted features given in the above table are utilized to calculate verification and retrieval scores which are given in the table below:
 
-The following table shows the results for verification task using the features given in the above table:
+|                     |               | Verification |          |          |          |          | Retrieval |          |          |
+| ------------------- | ------------- | ------------ | -------- | -------- | -------- | -------- | --------- | -------- | -------- |
+| Method              | Train Dataset | Precision    | Recall   | F1       | Acc      | ROC AUC  | mAP       | Top1     | Top5     |
+| SIFT w/ BoVW        | N/A           | 0.57         | 0.65     | 0.61     | 0.58     | 0.61     | 0.03      | 0.01     | 0.04     |
+| LIFT w/ BoVW        | Piccadilly    | 0.56         | 0.60     | 0.58     | 0.57     | 0.59     | 0.03      | 0.01     | 0.04     |
+| VGG-16              | ImageNet      | 0.75         | 0.63     | 0.68     | 0.71     | 0.78     | 0.18      | 0.13     | 0.23     |
+| ResNet-50           | ImageNet      | 0.63         | 0.66     | 0.65     | 0.64     | 0.69     | 0.06      | 0.04     | 0.08     |
+| ResNet-101          | ImageNet      | 0.63         | 0.67     | 0.65     | 0.64     | 0.69     | 0.05      | 0.03     | 0.07     |
+| NetVLAD (VGG-16)    | Pittsburgh30k | 0.83         | **0.80** | 0.82     | 0.82     | 0.90     | 0.26      | 0.17     | 0.33     |
+| AP-GeM (ResNet-101) | Landmarks     | **0.88**     | 0.78     | **0.83** | **0.84** | **0.92** | **0.35**  | **0.24** | **0.48** |
+| SimSiam (ResNet-50) | ImageNet      | 0.75         | 0.76     | 0.75     | 0.75     | 0.83     | 0.19      | 0.12     | 0.26     |
+| SimSiam (ResNet-50) | GLDv2         | 0.80         | 0.79     | 0.80     | 0.80     | 0.86     | 0.23      | 0.15     | 0.32     |
+| SimSiam (ResNet-50) | AmsterTime    | 0.72         | 0.75     | 0.73     | 0.73     | 0.81     | 0.19      | 0.12     | 0.26     |
+| SimSiam (VGG-16)    | ImageNet      | 0.63         | 0.72     | 0.67     | 0.65     | 0.71     | 0.10      | 0.06     | 0.14     |
+| SimSiam (VGG-16)    | GLDv2         | 0.63         | 0.77     | 0.70     | 0.66     | 0.75     | 0.12      | 0.07     | 0.18     |
+| SimSiam (VGG-16)    | AmsterTime    | 0.77         | 0.70     | 0.73     | 0.74     | 0.81     | 0.16      | 0.10     | 0.22     |
 
-|           | SIFT | LIFT | VGG-16 | ResNet-50 | ResNet-101 | NetVLAD w/ ResNet-18 | SimSiam w/ ResNet-18 | SimSiam w/ ResNet-18 | SimSiam w/ NetVLAD | Resnet101-AP-GeM | Triplet ResNet-18 |
-| --------- | ---- | ---- | ------ | --------- | ---------- | -------------------- | -------------------- | -------------------- | ------------------ | ---------------- | ----------------- |
-| Precision | 0.55 | 0.51 | 0.58   | 0.63      | 0.63       | 0.83                 | 0.54                 | 0.52                 | 0.70               | 0.88             | 0.81              |
-| Recall    | 0.73 | 0.74 | 0.62   | 0.66      | 0.67       | 0.80                 | 0.80                 | 0.71                 | 0.74               | 0.78             | 0.91              |
-| F1        | 0.62 | 0.61 | 0.60   | 0.65      | 0.65       | 0.82                 | 0.65                 | 0.60                 | 0.72               | 0.83             | 0.86              |
-| Accuracy  | 0.56 | 0.52 | 0.58   | 0.63      | 0.64       | 0.82                 | 0.56                 | 0.52                 | 0.71               | 0.84             | 0.85              |
+## Citation
 
-### Results for retrieval task
+If you use the datasets or find our paper useful in your research, please consider citing:
 
-The following table shows the results for retrieval task using the features given in the above table:
-
-| Query Image | Metric  | SIFT | LIFT | VGG-16 | ResNet-50 | ResNet-101 | NetVLAD w/ ResNet-18 | SimSiam w/ ResNet-18 | SimSiam w/ ResNet-18 | SimSiam w/ NetVLAD | Resnet101-AP-GeM | Triplet ResNet-18 |
-| ----------- | ------- | ---- | ---- | ------ | --------- | ---------- | -------------------- | -------------------- | -------------------- | ------------------ | ---------------- | ----------------- |
-| Historical  | mAP@128 | 0.03 | 0.02 | 0.08   | 0.06      | 0.05       | 0.26                 | 0.03                 | 0.07                 | 0.29               | 0.35             | 0.40              |
-|             | Top1    | 0.01 | 0.01 | 0.06   | 0.03      | 0.03       | 0.17                 | 0.01                 | 0.04                 | 0.21               | 0.24             | 0.28              |
-|             | Top5    | 0.03 | 0.04 | 0.11   | 0.07      | 0.07       | 0.33                 | 0.03                 | 0.07                 | 0.36               | 0.48             | 0.51              |
-| Street-view | mAP@128 | 0.02 | 0.02 | 0.06   | 0.05      | 0.06       | 0.26                 | 0.02                 | 0.07                 | 0.29               | 0.34             | 0.39              |
-|             | Top1    | 0.01 | 0.01 | 0.04   | 0.03      | 0.03       | 0.18                 | 0.00                 | 0.03                 | 0.20               | 0.24             | 0.28              |
-|             | Top5    | 0.02 | 0.03 | 0.08   | 0.06      | 0.07       | 0.34                 | 0.03                 | 0.09                 | 0.38               | 0.44             | 0.51              |
-| All         | mAP@128 | 0.02 | 0.02 | 0.07   | 0.05      | 0.05       | 0.26                 | 0.02                 | 0.07                 | 0.29               | 0.35             | 0.40              |
-|             | Top1    | 0.01 | 0.01 | 0.05   | 0.03      | 0.03       | 0.18                 | 0.01                 | 0.04                 | 0.21               | 0.24             | 0.28              |
-|             | Top5    | 0.03 | 0.03 | 0.09   | 0.07      | 0.07       | 0.33                 | 0.03                 | 0.08                 | 0.37               | 0.46             | 0.51              |
-
+```
+@article{yildiz2022amstertime,
+  title={AmsterTime: A Visual Place Recognition Benchmark Dataset for Severe Domain Shift},
+  author={Yildiz, Burak and Khademi, Seyran and Siebes, Ronald Maria and van Gemert, Jan},
+  journal={arXiv preprint arXiv:2203.16291},
+  year={2022}
+}
+```

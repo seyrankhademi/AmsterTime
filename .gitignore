@@ -4,4 +4,6 @@
 data
 toy_data
 features
+datasets/amstertime
+datasets/gldv2_clean_amsterdam
 .vscode

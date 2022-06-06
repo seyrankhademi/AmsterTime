@@ -14,7 +14,8 @@ def extract_sift(filepath, sift, draw=False):
     kp, descs = sift.detectAndCompute(gray, None)
     if draw:
         img = cv.drawKeypoints(
-            gray, kp, img, flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+            gray, kp, img, flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS
+        )
         return img
     return kp, descs
 
@@ -22,9 +23,9 @@ def extract_sift(filepath, sift, draw=False):
 def main(args):
     sift = cv.SIFT_create()
     if args.single_file:
-        new_filepath = os.path.join(args.data, 'new', args.single_file)
+        new_filepath = os.path.join(args.data, "new", args.single_file)
         new_img = extract_sift(new_filepath, sift, draw=True)
-        old_filepath = os.path.join(args.data, 'old', args.single_file)
+        old_filepath = os.path.join(args.data, "old", args.single_file)
         old_img = extract_sift(old_filepath, sift, draw=True)
         img = np.hstack((new_img, old_img))
         plt.imshow(cv.cvtColor(img, cv.COLOR_BGR2RGB))
@@ -33,7 +34,7 @@ def main(args):
 
     descriptors = {}
     if os.path.exists(args.file):
-        with open(args.file, 'rb') as f:
+        with open(args.file, "rb") as f:
             descriptors = pickle.load(f)
 
     num_descriptors = 0
@@ -45,24 +46,28 @@ def main(args):
             if fname not in cdescs:
                 _, descs = extract_sift(path, sift)
                 if descs is None:
-                    print(path, ' has no sift descsiptors')
+                    print(path, " has no sift descsiptors")
                     continue
                 num_descriptors += len(descs)
                 cdescs[fname] = descs
         descriptors[cname] = cdescs
 
-    print('# of extracted sift descriptors:', num_descriptors)
-    with open(args.file, 'wb') as f:
+    print("# of extracted sift descriptors:", num_descriptors)
+    with open(args.file, "wb") as f:
         pickle.dump(descriptors, f)
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='SIFT feature extractor')
-    parser.add_argument('data', help='path to data set')
-    parser.add_argument('--file', default='sift_descs.p',
-                        help='path to pickle file to save sift descriptors')
-    parser.add_argument('--single-file', required=False,
-                        help='file to visualize sift features')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="SIFT feature extractor")
+    parser.add_argument("data", help="path to data set")
+    parser.add_argument(
+        "--file",
+        default="sift_descs.p",
+        help="path to pickle file to save sift descriptors",
+    )
+    parser.add_argument(
+        "--single-file", required=False, help="file to visualize sift features"
+    )
     args = parser.parse_args()
 
     main(args)

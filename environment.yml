@@ -1,0 +1,19 @@
+name: amstertime
+channels:
+  - pytorch
+  - defaults
+dependencies:
+  - pip=21.2.4=py38hecd8cb5_0
+  - python=3.8.13=hdfd78df_0
+  - pytorch=1.8.0=py3.8_0
+  - torchvision=0.9.0=py38_cpu
+  - pip:
+      - black==22.3.0
+      - matplotlib==3.3.4
+      - numpy==1.19.2
+      - opencv-python==4.5.5.64
+      - pandas==1.2.3
+      - requests==2.25.1
+      - scikit-learn==0.24.1
+      - scipy==1.6.1
+      - tqdm==4.59.0
